@@ -2,11 +2,23 @@
 
 **语言 / Language:** 中文 **|** [English](README.md)
 
+[![build](https://github.com/Slingerspir/dll-injection-monitor/actions/workflows/build.yml/badge.svg)](https://github.com/Slingerspir/dll-injection-monitor/actions/workflows/build.yml)
+[![release](https://img.shields.io/github/v/release/Slingerspir/dll-injection-monitor)](https://github.com/Slingerspir/dll-injection-monitor/releases/latest)
+
 命令行工具：**生成一个能实时查看自己被注入了哪些 DLL 的程序**，
 并且可以给它指定任意身份（文件名、图标、版本信息）。
 
 生成的程序打开后是一个窗口，列出自己进程里加载的**全部 DLL**，
 被注入的那些标上 `INJ`，状态栏变红，可以一键复制完整报告。
+
+## 下载
+
+直接从 [最新 Release](https://github.com/Slingerspir/dll-injection-monitor/releases/latest) 获取：
+
+| 文件 | 说明 |
+|---|---|
+| `exebuilder.exe` | 生成器 |
+| `demo-monitor.exe` | 开箱即用的监视器，无需参数 |
 
 ---
 

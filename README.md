@@ -2,6 +2,9 @@
 
 **Language:** English **|** [中文](README.zh.md)
 
+[![build](https://github.com/Slingerspir/dll-injection-monitor/actions/workflows/build.yml/badge.svg)](https://github.com/Slingerspir/dll-injection-monitor/actions/workflows/build.yml)
+[![release](https://img.shields.io/github/v/release/Slingerspir/dll-injection-monitor)](https://github.com/Slingerspir/dll-injection-monitor/releases/latest)
+
 A command-line tool that **generates a program which shows, in real time,
 which DLLs have been injected into it** — and lets you give that program
 any identity you want (file name, icon, version info).
@@ -9,6 +12,16 @@ any identity you want (file name, icon, version info).
 The generated program opens a window listing **every DLL** loaded in its own
 process. Injected ones are flagged `INJ`, the status line turns red, and the
 full report can be copied or saved with one click.
+
+## Download
+
+Grab the prebuilt binaries from the
+[latest release](https://github.com/Slingerspir/dll-injection-monitor/releases/latest):
+
+| Asset | Description |
+|---|---|
+| `exebuilder.exe` | The generator |
+| `demo-monitor.exe` | A ready-to-run monitor, no arguments needed |
 
 ---
 
