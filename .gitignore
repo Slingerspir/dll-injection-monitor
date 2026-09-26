@@ -1,0 +1,18 @@
+# Build output
+build/
+dist/
+*.o
+
+# Generated payload template (built from source)
+payload_template.exe
+
+# Runtime artifacts produced by the monitor
+injection_report_*.txt
+injection_marker.txt
+
+# Editor / OS noise
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+desktop.ini

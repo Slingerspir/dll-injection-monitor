@@ -1,0 +1,12 @@
+# Normalize line endings: keep LF in the repo so the source is identical
+# on every platform, and let Windows checkouts use CRLF.
+* text=auto eol=lf
+
+# Windows batch files must be CRLF or cmd.exe mis-parses them.
+*.bat text eol=crlf
+
+# Binary
+*.exe binary
+*.dll binary
+*.ico binary
+*.o   binary

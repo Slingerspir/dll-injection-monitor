@@ -1,0 +1,105 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # windows-latest ships MinGW-w64 as part of the MSYS2 toolchain that
+      # is already on PATH; verify before building so a missing toolchain
+      # fails loudly instead of producing a confusing linker error.
+      - name: Verify toolchain
+        shell: pwsh
+        run: |
+          gcc --version
+          windres --version
+
+      - name: Build
+        shell: cmd
+        run: build.bat
+
+      - name: Smoke test
+        shell: pwsh
+        run: |
+          # Generate a monitor, confirm the version resource really landed
+          # and that the produced exe is a runnable PE.
+          .\build\exebuilder.exe build --out .\dist\javaw.exe `
+              --name javaw.exe --internal javaw `
+              --company "Eclipse Adoptium" `
+              --desc "OpenJDK Platform binary" `
+              --product "OpenJDK Platform 17.0.2" `
+              --version 17.0.2.0
+
+          .\build\exebuilder.exe info .\dist\javaw.exe
+
+          $vi = (Get-Item .\dist\javaw.exe).VersionInfo
+          if ($vi.CompanyName -ne 'Eclipse Adoptium') {
+            throw "version resource did not apply: '$($vi.CompanyName)'"
+          }
+
+          # Launch it and make sure it stays alive (it should open a window).
+          $p = Start-Process .\dist\javaw.exe -PassThru
+          Start-Sleep -Seconds 4
+          if ($p.HasExited) { throw "generated exe exited: $($p.ExitCode)" }
+          Stop-Process -Id $p.Id -Force
+          Write-Host "smoke test passed"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: exebuilder
+          path: |
+            build/exebuilder.exe
+            dist/javaw.exe
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        shell: cmd
+        run: build.bat
+
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path out | Out-Null
+          Copy-Item build\exebuilder.exe out\
+          # Also ship a ready-to-run demo monitor so the Release is useful
+          # without building anything.
+          .\build\exebuilder.exe build --out .\out\demo-monitor.exe `
+              --name demo-monitor.exe --company "dll-injection-monitor" `
+              --desc "DLL Injection Monitor" `
+              --product "dll-injection-monitor" `
+              --version ${{ github.ref_name }}.0
+          Copy-Item README.md, README.zh.md, LICENSE out\
+          Get-ChildItem out | Format-Table Name, Length
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            out/exebuilder.exe
+            out/demo-monitor.exe
+            out/README.md
+            out/README.zh.md
+            out/LICENSE
+          generate_release_notes: true
+          draft: false

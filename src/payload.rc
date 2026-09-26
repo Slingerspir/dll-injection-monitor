@@ -1,0 +1,11 @@
+#include <winver.h>
+
+/*
+ * payload.rc - embeds the injection-monitor template into exebuilder.exe.
+ *
+ * The template is stored as RCDATA so the generator is a single file: at
+ * runtime it extracts this blob, writes it out, then stamps the requested
+ * name/icon/version info onto the copy.
+ */
+
+200 RCDATA "payload_template.exe"
