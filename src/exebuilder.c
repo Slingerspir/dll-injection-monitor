@@ -351,11 +351,37 @@ static BYTE *build_version_resource(const Options *o, DWORD *size)
 /* ------------------------------------------------------------------ */
 
 /*
+ * Create every intermediate directory in `path` so that
+ * `build --out dist\x.exe` works even when dist\ does not exist yet.
+ * Without this, CreateFile fails with ERROR_PATH_NOT_FOUND (3).
+ */
+static void ensure_parent_dirs(const wchar_t *path)
+{
+    wchar_t tmp[MAX_PATH];
+    wcsncpy(tmp, path, MAX_PATH - 1);
+    tmp[MAX_PATH - 1] = 0;
+
+    for (wchar_t *p = tmp; *p; ++p) {
+        if (*p != L'\\' && *p != L'/') continue;
+
+        /* Skip a leading drive spec like "C:\". */
+        if (p == tmp + 2 && tmp[1] == L':') continue;
+
+        wchar_t saved = *p;
+        *p = 0;
+        if (tmp[0]) CreateDirectoryW(tmp, NULL);
+        *p = saved;
+    }
+}
+
+/*
  * Write the built-in injection-monitor template out to `path`.
  * Returns 1 on success. This is what makes `build` work with only --out.
  */
 static int extract_payload(const wchar_t *path)
 {
+    ensure_parent_dirs(path);
+
     HMODULE self = GetModuleHandleW(NULL);
 
     HRSRC r = FindResourceW(self, MAKEINTRESOURCEW(PAYLOAD_RCDATA_ID),
@@ -595,6 +621,7 @@ static int cmd_build(const Options *o)
             fwprintf(stderr, L"[!] template not found: %ls\n", o->src);
             return 1;
         }
+        ensure_parent_dirs(o->out);
         if (!CopyFileW(o->src, o->out, FALSE)) {
             fwprintf(stderr, L"[!] cannot copy to %ls (error %lu)\n",
                      o->out, (unsigned long)GetLastError());

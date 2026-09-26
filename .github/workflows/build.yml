@@ -33,12 +33,14 @@ jobs:
         run: |
           # Generate a monitor, confirm the version resource really landed
           # and that the produced exe is a runnable PE.
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
           .\build\exebuilder.exe build --out .\dist\javaw.exe `
               --name javaw.exe --internal javaw `
               --company "Eclipse Adoptium" `
               --desc "OpenJDK Platform binary" `
               --product "OpenJDK Platform 17.0.2" `
               --version 17.0.2.0
+          if ($LASTEXITCODE -ne 0) { throw "exebuilder build failed" }
 
           .\build\exebuilder.exe info .\dist\javaw.exe
 
@@ -88,7 +90,8 @@ jobs:
               --name demo-monitor.exe --company "dll-injection-monitor" `
               --desc "DLL Injection Monitor" `
               --product "dll-injection-monitor" `
-              --version ${{ github.ref_name }}.0
+              --version 1.0.0.0
+          if ($LASTEXITCODE -ne 0) { throw "demo build failed" }
           Copy-Item README.md, README.zh.md, LICENSE out\
           Get-ChildItem out | Format-Table Name, Length
 
